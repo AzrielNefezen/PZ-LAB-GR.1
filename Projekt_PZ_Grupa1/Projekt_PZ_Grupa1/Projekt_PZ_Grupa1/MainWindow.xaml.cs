@@ -21,8 +21,6 @@ namespace Projekt_PZ_Grupa1
     /// </summary>
     public partial class MainWindow : Window
     {
-        string plik_out;
-        string plik_mes;
         string sciezka;
         string[] lines_out;
         string[] lines_mes;
@@ -76,19 +74,20 @@ namespace Projekt_PZ_Grupa1
 
         private void wyniki_out_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            List<String> akt_out = new List<String> { };
-
+            List<String> out_act = new List<String> { };
             string line = wyniki_out.SelectedItem.ToString();
-
-            string reg_line = "[a-zA-Z0-9;.,]+";
-
-            foreach (Match match in Regex.Matches(line, reg_line))
+            string reg_out = "([0-9a-zA-Z.;,])+";
+            foreach (Match match in Regex.Matches(line, reg_out))
             {
-                akt_out.Add(match.ToString());
+                out_act.Add(match.ToString());
             }
-            if (akt_out.Count > 10)
+            if (out_act.Count>=16)
             {
-                wyniki_mes.Text = akt_out[0] + " " + akt_out[1] + " " + akt_out[2];
+                wyniki_mes.Text = out_act[14] + " " + out_act[15];
+            }
+            else
+            {
+                wyniki_mes.Text = "Nieprawidlowa linia";
             }
         }
     }
