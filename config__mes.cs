@@ -16,29 +16,12 @@ namespace ConsoleApplication1
         {
             Array splitted= a.Split(' ');
             config_name = splitted;
-            subm.Add(new submatrix__mes());
         }
         public void assign_submatrix(string a)
         {
             Array splitted = a.Split('-');
 
         }
-        
-        public void add_submatrix()
-        {
-            subm.Add(new submatrix__mes());
-        }
-
-        public void assign_subm_parameters(int a,string b)
-        {
-            subm[a].assign_parameters(b);
-        }
-
-        public int subm_lenght()
-        {
-            return subm.Count() - 1;
-        }
-            
         public void assign_parameters(string a)
         {
             a = a.Replace(" ","");
