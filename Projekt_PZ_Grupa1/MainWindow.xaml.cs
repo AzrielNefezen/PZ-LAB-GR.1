@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Text.RegularExpressions;
 
 namespace Projekt_PZ_Grupa1
 {
@@ -66,10 +67,28 @@ namespace Projekt_PZ_Grupa1
             }
             else
             {
-                for (int i = 38; i < lines_out.Length; i++)
+                for (int i = 0; i < lines_out.Length; i++)
                 {
                     wyniki_out.Items.Add(lines_out[i]);
                 }
+            }
+        }
+
+        private void wyniki_out_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            List<String> akt_out = new List<String> { };
+
+            string line = wyniki_out.SelectedItem.ToString();
+
+            string reg_line = "[a-zA-Z0-9;.,]+";
+
+            foreach (Match match in Regex.Matches(line, reg_line))
+            {
+                akt_out.Add(match.ToString());
+            }
+            if (akt_out.Count > 10)
+            {
+                wyniki_mes.Text = akt_out[0] + " " + akt_out[1] + " " + akt_out[2];
             }
         }
     }
