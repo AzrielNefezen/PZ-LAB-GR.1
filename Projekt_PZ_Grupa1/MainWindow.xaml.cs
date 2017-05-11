@@ -29,6 +29,7 @@ namespace Projekt_PZ_Grupa1
         string[] text_m;
         string lines_mes;
         string[] lines_out;
+        String[] splitted;
         List<SingleSubmatrix> SubMatrices = new List<SingleSubmatrix> { };
         public MainWindow()
         {
@@ -49,13 +50,13 @@ namespace Projekt_PZ_Grupa1
                 //{
                 //    lines_out = System.IO.File.ReadAllLines(match.ToString());
                 //}
-                String[] splitted2 = Regex.Split(text, "OBS.G-CAL.G");
+                splitted = Regex.Split(text, "OBS.G-CAL.G");
                 //String joined = "";
-                splitted2[0] = "";
-                File.WriteAllText("abc.txt", splitted2[1]);
+                splitted[0] = "";
+                File.WriteAllText("abc.txt", splitted[1]);
 
-                splitted2 = Regex.Split(System.IO.File.ReadAllText("abc.txt"), "ITERATION");
-                File.WriteAllText("abc.txt", splitted2[0]);
+                splitted = Regex.Split(System.IO.File.ReadAllText("abc.txt"), "ITERATION");
+                File.WriteAllText("abc.txt", splitted[0]);
                 lines_out = System.IO.File.ReadAllLines("abc.txt");
                 label_out.Content = "Zaladowano plik .out";
             }
@@ -82,7 +83,7 @@ namespace Projekt_PZ_Grupa1
 
                 MatchCollection SingleCoordinates = Regex.Matches(text, "(?<=\\()( )+([0-9]+,( )+[0-9]+)");
 
-                String[] splitted = Regex.Split(text, "EIGENVECTORS,SUBMATRIX  1");
+                splitted = Regex.Split(text, "EIGENVECTORS,SUBMATRIX  1");
                 String joined = "";
                 splitted[0] = "";
 
