@@ -45,7 +45,18 @@ namespace Projekt_PZ_Grupa1
             {
                 sciezka = out1.FileName;
                 text = System.IO.File.ReadAllText(sciezka);
-                lines_out = System.IO.File.ReadAllLines(sciezka);
+                //foreach (Match match in Regex.Matches(lines_mes, "(?<=EIGENVECTORS,SUBMATRIX( )+)([0-9])+"))
+                //{
+                //    lines_out = System.IO.File.ReadAllLines(match.ToString());
+                //}
+                String[] splitted2 = Regex.Split(text, "OBS.G-CAL.G");
+                //String joined = "";
+                splitted2[0] = "";
+                File.WriteAllText("abc.txt", splitted2[1]);
+
+                splitted2 = Regex.Split(System.IO.File.ReadAllText("abc.txt"), "ITERATION");
+                File.WriteAllText("abc.txt", splitted2[0]);
+                lines_out = System.IO.File.ReadAllLines("abc.txt");
                 label_out.Content = "Zaladowano plik .out";
             }
             if (sciezka != null)
