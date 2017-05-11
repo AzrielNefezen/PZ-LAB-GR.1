@@ -14,5 +14,6 @@
         <Label x:Name="label_mes" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="140,36,0,0" Height="26"/>
         <ListBox x:Name="wyniki_out" Visibility="Visible" HorizontalAlignment="Left" Height="190" VerticalAlignment="Top" Margin="10,100,0,0" Width="750" SelectionChanged="wyniki_out_SelectionChanged"/>
         <TextBox x:Name="wyniki_mes" HorizontalAlignment="Left" Height="190" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="750" Margin="10,295,0,0"/>
+        <Button x:Name="button" Content="Zapisz" HorizontalAlignment="Left" Margin="646,505,0,0" Width="114" Height="22" VerticalAlignment="Top" Click="button_Click"/>
     </Grid>
 </Window>

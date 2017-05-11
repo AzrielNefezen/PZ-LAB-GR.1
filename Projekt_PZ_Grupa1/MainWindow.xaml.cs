@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Text.RegularExpressions;
 using System.Data.SQLite;
+using Microsoft.Win32;
+using System.IO;
 
 namespace Projekt_PZ_Grupa1
 {
@@ -269,6 +271,15 @@ namespace Projekt_PZ_Grupa1
                 wyniki_mes.Text = "0";
                 
             }
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.FileName = "DefaultOutputName.txt";
+            save.Filter = "Text File | *.txt";
+            if (save.ShowDialog() == true)
+                File.WriteAllText(save.FileName, wyniki_mes.Text);
         }
     }
 }
