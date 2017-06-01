@@ -46,18 +46,11 @@ namespace Projekt_PZ_Grupa1
             {
                 sciezka = out1.FileName;
                 text = System.IO.File.ReadAllText(sciezka);
-                //foreach (Match match in Regex.Matches(lines_mes, "(?<=EIGENVECTORS,SUBMATRIX( )+)([0-9])+"))
-                //{
-                //    lines_out = System.IO.File.ReadAllLines(match.ToString());
-                //}
                 splitted = Regex.Split(text, "OBS.G-CAL.G");
-                //String joined = "";
                 splitted[0] = "";
-                File.WriteAllText("abc.txt", splitted[1]);
+                splitted = Regex.Split(splitted[1], "ITERATION");
 
-                splitted = Regex.Split(System.IO.File.ReadAllText("abc.txt"), "ITERATION");
-                File.WriteAllText("abc.txt", splitted[0]);
-                lines_out = System.IO.File.ReadAllLines("abc.txt");
+                lines_out = splitted[0].Split(new char[] { Convert.ToChar("\n") }, StringSplitOptions.RemoveEmptyEntries);
                 label_out.Content = "Zaladowano plik .out";
             }
             if (sciezka != null)
@@ -105,8 +98,9 @@ namespace Projekt_PZ_Grupa1
                     myCommand = new SQLiteCommand("INSERT INTO Submatrices (Indexxxx)  VALUES(" + temp.Index + ");");
                     myCommand.Connection = sqlite;
                     myCommand.ExecuteNonQuery();
-                    string queryString = "INSERT INTO Amplitudes (SubmatrixIndexX, SubmatrixIndexY, Value, SubmatrixID) VALUES";
-
+                    //string queryString = "INSERT INTO Amplitudes (SubmatrixIndexX, SubmatrixIndexY, Value, SubmatrixID) VALUES";
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                    sb.Append("INSERT INTO Amplitudes (SubmatrixIndexX, SubmatrixIndexY, Value, SubmatrixID) VALUES");
                     for (; currentElement < SingleCoordinates.Count;)
                     {
                         {
@@ -119,14 +113,16 @@ namespace Projekt_PZ_Grupa1
 
                                 SubMatrices[Convert.ToInt32(index.ToString())].Values.Add(tempSingleSubmatrixValues);
                                 currentElement++;
-                                queryString = String.Concat(queryString, "(" + tempSingleSubmatrixValues.IndexX + ", " + tempSingleSubmatrixValues.IndexY + ", " + tempSingleSubmatrixValues.Value + ", " + SubMatrices[Convert.ToInt32(index.ToString())].Values.FindIndex(s => s.Equals(tempSingleSubmatrixValues)) + "),");
-
+                                //TODO Change to StringBuilder.Append();
+                                //queryString = String.Concat(queryString, "(" + tempSingleSubmatrixValues.IndexX + ", " + tempSingleSubmatrixValues.IndexY + ", " + tempSingleSubmatrixValues.Value + ", " + SubMatrices[Convert.ToInt32(index.ToString())].Index + "),");
+                                sb.Append("(" + tempSingleSubmatrixValues.IndexX + ", " + tempSingleSubmatrixValues.IndexY + ", " + tempSingleSubmatrixValues.Value + ", " + SubMatrices[Convert.ToInt32(index.ToString())].Index + "),");
                                 lastIndex = Convert.ToInt32(CoordinatesText.Split(',')[0]);
                             }
 
 
                             else
                             {
+                                string queryString = sb.ToString();
                                 queryString = queryString.Remove(queryString.Length - 1);
                                 myCommand = new SQLiteCommand(queryString);
                                 myCommand.Connection = sqlite;
@@ -183,17 +179,24 @@ namespace Projekt_PZ_Grupa1
 
 
                 list_mes.Add(new config__mes());
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                sb.Append("INSERT INTO Configuration (Config_name, Min, Max)  VALUES");
 
                 foreach (Match match in Regex.Matches(lines_mes, reg_mes))
                 {
-                    myCommand = new SQLiteCommand("INSERT INTO Configuration (Config_name, Min, Max)  VALUES('" + match.ToString() + "', 0, 0);");
-                    myCommand.Connection = sqlite;
-                    myCommand.ExecuteNonQuery();
+                    sb.Append("('" + match.ToString() + "', 0, 0),");
                     list_mes.Add(new config__mes(match.ToString()));
                 }
-
+                string queryString = sb.ToString();
+                queryString = queryString.Remove(queryString.Length - 1);
+                myCommand = new SQLiteCommand(queryString);
+                myCommand.Connection = sqlite;
+                myCommand.ExecuteNonQuery();
                 int counter = 0;
                 reg_mes = "(?<=submatrix( )*)([0-9]+)(?= )";
+
+                System.Text.StringBuilder sb2 = new System.Text.StringBuilder();
+                sb2.Append("INSERT INTO submatrix_mes (configID, term_max, term_min) VALUES");
 
                 foreach (Match match in Regex.Matches(lines_mes, reg_mes))
                 {
@@ -201,12 +204,15 @@ namespace Projekt_PZ_Grupa1
                     {
                         counter++;
                     }
-                    myCommand = new SQLiteCommand("INSERT INTO submatrix_mes (configID, term_max, term_min) VALUES(" + counter + ", 1, 1);");
-                    myCommand.Connection = sqlite;
-                    myCommand.ExecuteNonQuery();
+                    sb2.Append("(" + counter + ", 1, 1),");
+
                     list_mes[counter].add_submatrix();
                 }
-
+                string queryString2 = sb2.ToString();
+                queryString2 = queryString2.Remove(queryString2.Length - 1);
+                myCommand = new SQLiteCommand(queryString2);
+                myCommand.Connection = sqlite;
+                myCommand.ExecuteNonQuery();
                 reg_mes = "(?<=terms( )*)(.*?)(?=)(.*)";
 
                 i = 1;
@@ -270,8 +276,25 @@ namespace Projekt_PZ_Grupa1
                     wyniki_mes.Text = out_act[0] + " " + out_act[1];
                     int IndexX = Convert.ToInt32(out_act[0]);
                     int IndexY = Convert.ToInt32(out_act[1]);
-                    double value = SubMatrices[IndexX].Values[IndexY -1].Value;
-                    wyniki_mes.Text = value.ToString();
+                    SQLiteConnection sqlite;
+                    sqlite = new SQLiteConnection("Data Source=PZdb.db;Version=3;New=True;Compress=True;");
+                    sqlite.Open();
+                    SQLiteCommand myCommand = new SQLiteCommand("SELECT Value FROM Amplitudes WHERE SubmatrixIndexX = " + IndexY + " AND SubmatrixID =" + IndexX + " ORDER BY Value LIMIT 10;");
+                    myCommand.Connection = sqlite;
+                    var reader = myCommand.ExecuteReader();
+                    var list = new List<double>();
+                    while (reader.Read()) {
+                        var result = reader.GetDouble(0);
+                        list.Add(result);
+                    }
+                    double[] rzecz = list.ToArray();
+                    wyniki_mes.Text = "Podmacierz nr "+ IndexX + ", poziom nr " + IndexY +":\n" ;
+                    foreach(double d in rzecz)
+                    {
+                        wyniki_mes.Text += d.ToString() + "\n";
+                    }
+                    //SubMatrices[IndexX].Values[IndexY -1].Value;
+                    //wyniki_mes.Text = value.ToString();
                 }
                 catch (System.FormatException er)
                 {
