@@ -74,7 +74,9 @@ namespace Projekt_PZ_Grupa1
 
                 MatchCollection SubmatrixIndex = Regex.Matches(text, "(?<=EIGENVECTORS,SUBMATRIX( )+)([0-9])+");
 
-                MatchCollection SingleCoordinates = Regex.Matches(text, "(?<=\\()( )+([0-9]+,( )+[0-9]+)");
+                MatchCollection SingleCoordinates = Regex.Matches(text, "(?<=\\()( )+([0-9]+,(( )?|[0-9]?)+[0-9]+)");
+
+                MatchCollection ConfigurationList = Regex.Matches(text, "(( )?[0-9]+[A-Za-z](,|;|)?)+");
 
                 splitted = Regex.Split(text, "EIGENVECTORS,SUBMATRIX  1");
                 String joined = "";
@@ -101,33 +103,37 @@ namespace Projekt_PZ_Grupa1
                     //string queryString = "INSERT INTO Amplitudes (SubmatrixIndexX, SubmatrixIndexY, Value, SubmatrixID) VALUES";
                     System.Text.StringBuilder sb = new System.Text.StringBuilder();
                     sb.Append("INSERT INTO Amplitudes (SubmatrixIndexX, SubmatrixIndexY, Value, SubmatrixID) VALUES");
-                    for (; currentElement < SingleCoordinates.Count;)
+                    for (; currentElement <= SingleCoordinates.Count; currentElement++)
                     {
                         {
-                            Match matched = SingleCoordinates[currentElement];
-                            string CoordinatesText = matched.ToString().Replace(" ", "");
-                            if (Convert.ToInt32(CoordinatesText.Split(',')[0]) >= lastIndex)
-                            {
+                            
+                                Match matched = currentElement < SingleCoordinates.Count? SingleCoordinates[currentElement]: SingleCoordinates[currentElement-1];
+                                string CoordinatesText = currentElement < SingleCoordinates.Count ? matched.ToString().Replace(" ", ""): "0";
+                                if (currentElement < SingleCoordinates.Count && Convert.ToInt32(CoordinatesText.Split(',')[0]) >= lastIndex )
+                                {
 
-                                SingleSubmatrixValues tempSingleSubmatrixValues = new SingleSubmatrixValues(Convert.ToInt32(CoordinatesText.Split(',')[0]), Convert.ToInt32(CoordinatesText.Split(',')[1]), Convert.ToDouble(Values[currentElement].ToString().Trim()));
+                                    SingleSubmatrixValues tempSingleSubmatrixValues = new SingleSubmatrixValues(Convert.ToInt32(CoordinatesText.Split(',')[0]), Convert.ToInt32(CoordinatesText.Split(',')[1]), Convert.ToDouble(Values[currentElement].ToString().Trim()));
 
-                                SubMatrices[Convert.ToInt32(index.ToString())].Values.Add(tempSingleSubmatrixValues);
-                                currentElement++;
+                                    SubMatrices[Convert.ToInt32(index.ToString())].Values.Add(tempSingleSubmatrixValues);
                                 //TODO Change to StringBuilder.Append();
                                 //queryString = String.Concat(queryString, "(" + tempSingleSubmatrixValues.IndexX + ", " + tempSingleSubmatrixValues.IndexY + ", " + tempSingleSubmatrixValues.Value + ", " + SubMatrices[Convert.ToInt32(index.ToString())].Index + "),");
-                                sb.Append("(" + tempSingleSubmatrixValues.IndexX + ", " + tempSingleSubmatrixValues.IndexY + ", " + tempSingleSubmatrixValues.Value + ", " + SubMatrices[Convert.ToInt32(index.ToString())].Index + "),");
-                                lastIndex = Convert.ToInt32(CoordinatesText.Split(',')[0]);
-                            }
+                                    sb.Append("(" + tempSingleSubmatrixValues.IndexX + ", " + tempSingleSubmatrixValues.IndexY + ", " + tempSingleSubmatrixValues.Value + ", " + SubMatrices[Convert.ToInt32(index.ToString())].Index + "),");
+                                    lastIndex = Convert.ToInt32(CoordinatesText.Split(',')[0]);
+                                }
+                            
 
 
                             else
                             {
                                 string queryString = sb.ToString();
+                                if (queryString == "INSERT INTO Amplitudes (SubmatrixIndexX, SubmatrixIndexY, Value, SubmatrixID) VALUES")
+                                {
+                                    break;
+                                }
                                 queryString = queryString.Remove(queryString.Length - 1);
                                 myCommand = new SQLiteCommand(queryString);
                                 myCommand.Connection = sqlite;
                                 myCommand.ExecuteNonQuery();
-                                currentElement++;
                                 lastIndex = Convert.ToInt32(CoordinatesText.Split(',')[0]);
                                 break;
                             }
@@ -279,7 +285,7 @@ namespace Projekt_PZ_Grupa1
                     SQLiteConnection sqlite;
                     sqlite = new SQLiteConnection("Data Source=PZdb.db;Version=3;New=True;Compress=True;");
                     sqlite.Open();
-                    SQLiteCommand myCommand = new SQLiteCommand("SELECT Value FROM Amplitudes WHERE SubmatrixIndexX = " + IndexY + " AND SubmatrixID =" + IndexX + " ORDER BY Value LIMIT 10;");
+                    SQLiteCommand myCommand = new SQLiteCommand("SELECT Value FROM Amplitudes WHERE SubmatrixIndexX = " + IndexY + " AND SubmatrixID =" + IndexX + " ORDER BY ABS(Value) DESC LIMIT 10;");
                     myCommand.Connection = sqlite;
                     var reader = myCommand.ExecuteReader();
                     var list = new List<double>();
